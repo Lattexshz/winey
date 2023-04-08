@@ -1,28 +1,21 @@
+use std::cell::{Ref, RefCell};
 use std::ffi::{c_int, c_void, OsStr};
 use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
-use std::ptr::{null, null_mut};
-use raw_window_handle::{HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle};
-use winapi::ENUM;
-use winapi::shared::minwindef::*;
-use winapi::shared::windef::HWND;
-use winapi::um::dwmapi::DwmSetWindowAttribute;
-use winapi::um::libloaderapi::GetModuleHandleW;
-use winapi::um::winuser::*;
+use std::ptr::{addr_of, null, null_mut};
+use std::sync::Mutex;
+use std::time::Duration;
+use once_cell::unsync::{Lazy, OnceCell};
+use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle, WindowsDisplayHandle};
+use windows_sys::{s, w};
+use windows_sys::Win32::Foundation::{HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
+use windows_sys::Win32::Graphics::Dwm::*;
+use windows_sys::Win32::Graphics::Gdi::ValidateRect;
+use windows_sys::Win32::System::LibraryLoader::*;
+use windows_sys::Win32::UI::WindowsAndMessaging::*;
 use crate::platform::{WindowCorner, WindowExtForWindows};
 use crate::window::WindowInitialization;
-use crate::WineyWindowImplementation;
-
-ENUM! {enum DWMWINDOWATTRIBUTE {
-      DWMWA_WINDOW_CORNER_PREFERENCE = 33,
-}}
-
-ENUM! {enum DWM_WINDOW_CORNER_PREFERENCE {
-        DWMWCP_DEFAULT      = 0,
-        DWMWCP_DONOTROUND   = 1,
-        DWMWCP_ROUND        = 2,
-        DWMWCP_ROUNDSMALL   = 3,
-}}
+use crate::{WindowEvent, WineyWindowImplementation};
 
 pub struct _Window {
     hinstance: HMODULE,
@@ -33,8 +26,37 @@ impl _Window {
 
 }
 
+impl _Window {
+   pub(crate) fn run<C: FnMut(WindowEvent)>(&self, mut callback: C) {
+        let mut message = unsafe { core::mem::zeroed() };
+
+        unsafe {
+
+            loop {
+                GetMessageW(&mut message, 0, 0, 0);
+                TranslateMessage(&mut message);
+                DispatchMessageW(&message);
+                callback(WindowEvent::Update);
+                match message.message {
+                    WM_PAINT => {
+                        callback(WindowEvent::RedrawRequested);
+                    }
+                    _ => {}
+                }
+
+                match MSG.message {
+                    WM_CLOSE => {
+                        callback(WindowEvent::CloseRequested);
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+}
+
 impl WindowInitialization for _Window {
-    fn new(title: &str,width:u32,height:u32) -> Self {
+    fn new(title: &str, width: u32, height: u32) -> Self {
         let title_wide: Vec<u16> = OsStr::new(&title)
             .encode_wide()
             .chain(Some(0).into_iter())
@@ -47,39 +69,38 @@ impl WindowInitialization for _Window {
 
         unsafe {
             let hinstance = GetModuleHandleW(std::ptr::null());
+            debug_assert!(hinstance != 0);
 
             let wc = WNDCLASSW {
-                hCursor: std::ptr::null_mut(),
+                hCursor: LoadCursorW(0, IDC_ARROW),
                 hInstance: hinstance,
                 lpszClassName: window_class.as_ptr(),
-                style: CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
+                style: CS_HREDRAW | CS_VREDRAW,
                 lpfnWndProc: Some(wndproc),
                 cbClsExtra: 0,
                 cbWndExtra: 0,
-                hIcon: std::ptr::null_mut(),
-                hbrBackground: std::ptr::null_mut(),
+                hIcon: 0,
+                hbrBackground: 0,
                 lpszMenuName: std::ptr::null(),
             };
 
-            RegisterClassW(&wc);
-
-            let mut msg = 0;
+            let atom = RegisterClassW(&wc);
+            debug_assert!(atom != 0);
 
             let hwnd = CreateWindowExW(
                 0,
                 window_class.as_ptr(),
                 title_wide.as_ptr(),
-                WS_OVERLAPPEDWINDOW,
+                WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
-                width as c_int,
-                height as c_int,
-                std::ptr::null_mut(),
-                std::ptr::null_mut(),
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                0,
+                0,
                 hinstance,
-                &mut msg as *mut i32 as _,
+                std::ptr::null(),
             );
-
             Self {
                 hinstance,
                 hwnd,
@@ -88,14 +109,6 @@ impl WindowInitialization for _Window {
     }
 }
 
-unsafe impl HasRawWindowHandle for _Window {
-    fn raw_window_handle(&self) -> RawWindowHandle {
-        let mut handle = Win32WindowHandle::empty();
-        handle.hwnd = self.hwnd as *mut c_void;
-        handle.hinstance = self.hinstance as *mut c_void;
-        RawWindowHandle::Win32(handle)
-    }
-}
 
 impl WineyWindowImplementation for _Window {
     fn show(&self) {
@@ -154,11 +167,11 @@ impl WineyWindowImplementation for _Window {
                 SetWindowLongW(
                     self.hwnd,
                     GWL_STYLE,
-                    (WS_POPUP | WS_BORDER) as winapi::shared::ntdef::LONG,
+                    (WS_POPUP | WS_BORDER) as i32,
                 );
                 SetWindowPos(
                     self.hwnd,
-                    null_mut(),
+                    0,
                     0,
                     0,
                     0,
@@ -170,19 +183,9 @@ impl WineyWindowImplementation for _Window {
                 SetWindowLongW(
                     self.hwnd,
                     GWL_STYLE,
-                    WS_OVERLAPPEDWINDOW as winapi::shared::ntdef::LONG,
+                    WS_OVERLAPPEDWINDOW as i32,
                 );
             },
-        }
-    }
-
-    fn run<C: FnMut()>(&self, callback: C) {
-        unsafe {
-            let mut message = std::mem::zeroed();
-
-            while GetMessageW(&mut message, null_mut(), 0, 0) != 0 {
-                DispatchMessageW(&message);
-            }
         }
     }
 }
@@ -192,27 +195,28 @@ impl WindowExtForWindows for _Window {
         unsafe {
             match corner {
                 WindowCorner::DoNotRound => {
+                    let a = DWMWCP_DONOTROUND;
                     DwmSetWindowAttribute(
                         self.hwnd,
                         DWMWA_WINDOW_CORNER_PREFERENCE,
-                        &DWMWCP_DONOTROUND as *const u32 as *const c_void as LPCVOID,
-                        size_of::<u32>() as DWORD,
+                        &DWMWCP_DONOTROUND as *const i32 as *const c_void,
+                        size_of::<u32>() as u32,
                     );
                 }
                 WindowCorner::SmallRound => {
                     DwmSetWindowAttribute(
                         self.hwnd,
                         DWMWA_WINDOW_CORNER_PREFERENCE,
-                        &DWMWCP_ROUNDSMALL as *const u32 as *const c_void as LPCVOID,
-                        size_of::<u32>() as DWORD,
+                        &DWMWCP_ROUNDSMALL as *const i32 as *const c_void,
+                        size_of::<u32>() as u32,
                     );
                 }
                 WindowCorner::Round => {
                     DwmSetWindowAttribute(
                         self.hwnd,
                         DWMWA_WINDOW_CORNER_PREFERENCE,
-                        &DWMWCP_ROUND as *const u32 as *const c_void as LPCVOID,
-                        size_of::<u32>() as DWORD,
+                        &DWMWCP_ROUND as *const i32 as *const c_void,
+                        size_of::<u32>() as u32,
                     );
                 }
             }
@@ -220,10 +224,68 @@ impl WindowExtForWindows for _Window {
     }
 }
 
-extern "system" fn wndproc(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM) -> LRESULT {
+unsafe impl HasRawWindowHandle for _Window {
+    fn raw_window_handle(&self) -> RawWindowHandle {
+        let mut handle = Win32WindowHandle::empty();
+        handle.hwnd = self.hwnd as *mut c_void;
+        handle.hinstance = self.hinstance as *mut c_void;
+        RawWindowHandle::Win32(handle)
+    }
+}
+
+unsafe impl HasRawDisplayHandle for _Window {
+    fn raw_display_handle(&self) -> RawDisplayHandle {
+        let mut handle = WindowsDisplayHandle::empty();
+        RawDisplayHandle::Windows(handle)
+    }
+}
+
+static mut MSG:MSG = MSG {
+    hwnd: 0,
+    message: 0,
+    wParam: 0,
+    lParam: 0,
+    time: 0,
+    pt: POINT { x: 0, y: 0 },
+};
+
+// extern "system" fn wndproc(hWnd: HWND, Msg: u32, wParam: WPARAM, lParam: LPARAM) -> LRESULT {
+//     unsafe {
+//         match Msg {
+//             WM_CREATE => {
+//                 //set_msg(Msg, wParam, lParam);
+//                 0
+//             }
+//             WM_PAINT => {
+//                 //set_msg(Msg, wParam, lParam);
+//                 0
+//             }
+//             WM_DESTROY => {
+//                 //set_msg(Msg, wParam, lParam);
+//                 0
+//             }
+//             _ => DefWindowProcW(hWnd, Msg, wParam, lParam),
+//         }
+//     }
+// }
+
+extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     unsafe {
-        match Msg {
-            _ => DefWindowProcW(hWnd, Msg, wParam, lParam),
+        match message {
+            WM_CLOSE => {
+                MSG = MSG {
+                    hwnd: window,
+                    message,
+                    wParam: wparam,
+                    lParam: lparam,
+                    time: 0,
+                    pt: POINT { x: 0, y: 0 },
+                };
+                0
+            }
+            _ => {
+                DefWindowProcW(window, message, wparam, lparam)
+            },
         }
     }
 }

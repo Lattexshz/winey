@@ -1,6 +1,6 @@
 use std::cmp::max;
-use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
-use crate::WineyWindowImplementation;
+use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle};
+use crate::{WindowEvent, WineyWindowImplementation};
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -31,11 +31,21 @@ impl Window {
             inner: _Window::new(title,width,height)
         }
     }
+
+    pub fn run<C: FnMut(WindowEvent)>(&self, mut callback: C) {
+        self.inner.run(callback);
+    }
 }
 
 unsafe impl HasRawWindowHandle for Window {
     fn raw_window_handle(&self) -> RawWindowHandle {
         self.inner.raw_window_handle()
+    }
+}
+
+unsafe impl HasRawDisplayHandle for Window {
+    fn raw_display_handle(&self) -> RawDisplayHandle {
+        self.inner.raw_display_handle()
     }
 }
 
@@ -62,10 +72,6 @@ impl WineyWindowImplementation for Window {
 
     fn set_undecorated(&self, undecorated: bool) {
         self.inner.set_undecorated(undecorated);
-    }
-
-    fn run<C: FnMut()>(&self, callback: C) {
-        self.inner.run(callback);
     }
 }
 
