@@ -75,7 +75,7 @@ impl WindowInitialization for _Window {
                 hCursor: LoadCursorW(0, IDC_ARROW),
                 hInstance: hinstance,
                 lpszClassName: window_class.as_ptr(),
-                style: CS_HREDRAW | CS_VREDRAW,
+                style: CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
                 lpfnWndProc: Some(wndproc),
                 cbClsExtra: 0,
                 cbWndExtra: 0,
