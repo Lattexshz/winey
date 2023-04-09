@@ -3,6 +3,7 @@ use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandl
 use safex::xlib::{AsRaw, Color, ColorMap, Window};
 use crate::{WindowEvent, WineyWindowImplementation};
 use crate::window::WindowInitialization;
+use crate::window::{ControlFlow,Flow};
 
 pub struct _Window {
     window: safex::xlib::Window,
@@ -11,12 +12,13 @@ pub struct _Window {
 }
 
 impl _Window {
-    pub(crate) fn run<C: FnMut(WindowEvent)>(&self, mut callback: C) {
+    pub(crate) fn run<C: FnMut(WindowEvent,&mut ControlFlow)>(&self, mut callback: C) {
+        let mut control_flow = ControlFlow::new(Flow::Listen);
         self.window.run(|event,c| {
-            callback(crate::WindowEvent::Update);
+            callback(crate::WindowEvent::Update,&mut control_flow);
             match event {
                 safex::xlib::WindowEvent::Expose => {
-                    callback(crate::WindowEvent::RedrawRequested);
+                    callback(crate::WindowEvent::RedrawRequested,&mut control_flow);
                 }
             }
         })
