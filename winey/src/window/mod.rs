@@ -17,6 +17,31 @@ pub mod windows;
 #[cfg(target_os = "windows")]
 pub use self::windows::*;
 
+pub enum Flow {
+    Listen,
+    Exit(i32)
+}
+
+pub struct ControlFlow {
+    flow: Flow
+}
+
+impl ControlFlow {
+    pub fn new(flow: Flow) -> Self {
+        Self {
+            flow
+        }
+    }
+
+    pub fn listen(&mut self) {
+        self.flow = Flow::Listen
+    }
+
+    pub fn exit(&mut self,code: i32) {
+        self.flow = Flow::Exit(code);
+    }
+}
+
 pub(crate) trait WindowInitialization {
     fn new(title: &str,width:u32,height:u32) -> Self;
 }
@@ -32,7 +57,7 @@ impl Window {
         }
     }
 
-    pub fn run<C: FnMut(WindowEvent)>(&self, mut callback: C) {
+    pub fn run<C: FnMut(WindowEvent,&mut ControlFlow)>(&self, mut callback: C) {
         self.inner.run(callback);
     }
 }

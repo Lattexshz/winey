@@ -14,7 +14,7 @@ use windows_sys::Win32::Graphics::Gdi::ValidateRect;
 use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 use crate::platform::{WindowCorner, WindowExtForWindows};
-use crate::window::WindowInitialization;
+use crate::window::{ControlFlow, Flow, WindowInitialization};
 use crate::{KeyCode, WindowEvent, WineyWindowImplementation};
 
 pub struct _Window {
@@ -27,34 +27,43 @@ impl _Window {
 }
 
 impl _Window {
-   pub(crate) fn run<C: FnMut(WindowEvent)>(&self, mut callback: C) {
+   pub(crate) fn run<C: FnMut(WindowEvent,&mut ControlFlow)>(&self, mut callback: C) {
         let mut message = unsafe { core::mem::zeroed() };
+        let mut control_flow = ControlFlow::new(Flow::Listen);
 
         unsafe {
-
             loop {
-                GetMessageW(&mut message, 0, 0, 0);
-                TranslateMessage(&mut message);
-                DispatchMessageW(&message);
-                callback(WindowEvent::Update);
-                match message.message {
-                    WM_PAINT => {
-                        callback(WindowEvent::RedrawRequested);
-                    }
-                    WM_KEYUP => {
-                        callback(WindowEvent::KeyUp(KeyCode(message.wParam as u32)))
-                    }
-                    WM_KEYDOWN => {
-                        callback(WindowEvent::KeyDown(KeyCode(message.wParam as u32)));
-                    }
-                    _ => {}
-                }
+                match control_flow.flow {
+                    Flow::Listen => {
+                        GetMessageW(&mut message, 0, 0, 0);
+                        TranslateMessage(&mut message);
+                        DispatchMessageW(&message);
+                        callback(WindowEvent::Update,&mut control_flow);
+                        match message.message {
+                            WM_PAINT => {
+                                callback(WindowEvent::RedrawRequested,&mut control_flow);
+                            }
+                            WM_KEYUP => {
+                                callback(WindowEvent::KeyUp(KeyCode(message.wParam as u32)),&mut control_flow)
+                            }
+                            WM_KEYDOWN => {
+                                callback(WindowEvent::KeyDown(KeyCode(message.wParam as u32)),&mut control_flow);
+                            }
+                            _ => {}
+                        }
 
-                match MSG.message {
-                    WM_CLOSE => {
-                        callback(WindowEvent::CloseRequested);
+                        match MSG.message {
+                            WM_CLOSE => {
+                                callback(WindowEvent::CloseRequested,&mut control_flow);
+                            }
+                            _ => {}
+                        }
                     }
-                    _ => {}
+
+                    Flow::Exit(code) => {
+                        PostQuitMessage(code);
+                        break;
+                    }
                 }
             }
         }

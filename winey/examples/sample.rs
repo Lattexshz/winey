@@ -6,10 +6,10 @@ fn main() {
 
     window.show();
 
-    window.run(|event| {
+    window.run(|event,control_flow| {
         match event {
             WindowEvent::CloseRequested => {
-                std::process::exit(0);
+                control_flow.exit(0);
             }
 
             _ => {
