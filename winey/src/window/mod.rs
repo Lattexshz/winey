@@ -80,4 +80,16 @@ impl crate::platform::WindowExtForWindows for Window {
     fn set_window_corner_radius(&self, corner: crate::platform::WindowCorner) {
         self.inner.set_window_corner_radius(corner);
     }
+
+    fn set_window_border_color(&self,r: u8,g: u8,b: u8) {
+        self.inner.set_window_border_color(r,g,b);
+    }
+
+    fn set_window_caption_color(&self, r: u8, g: u8, b: u8) {
+        self.inner.set_window_caption_color(r, g, b);
+    }
+
+    fn set_window_text_color(&self, r: u8, g: u8, b: u8) {
+        self.inner.set_window_text_color(r,g,b);
+    }
 }

@@ -1,5 +1,5 @@
 use std::cell::{Ref, RefCell};
-use std::ffi::{c_int, c_void, OsStr};
+use std::ffi::{c_int, c_uchar, c_void, OsStr};
 use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
 use std::ptr::{addr_of, null, null_mut};
@@ -8,7 +8,7 @@ use std::time::Duration;
 use once_cell::unsync::{Lazy, OnceCell};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle, WindowsDisplayHandle};
 use windows_sys::{s, w};
-use windows_sys::Win32::Foundation::{HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
+use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
 use windows_sys::Win32::Graphics::Dwm::*;
 use windows_sys::Win32::Graphics::Gdi::ValidateRect;
 use windows_sys::Win32::System::LibraryLoader::*;
@@ -57,6 +57,9 @@ impl _Window {
 
 impl WindowInitialization for _Window {
     fn new(title: &str, width: u32, height: u32) -> Self {
+        unsafe {
+            SetProcessDPIAware();
+        }
         let title_wide: Vec<u16> = OsStr::new(&title)
             .encode_wide()
             .chain(Some(0).into_iter())
@@ -222,6 +225,39 @@ impl WindowExtForWindows for _Window {
             }
         }
     }
+
+    fn set_window_border_color(&self,r: u8,g: u8,b: u8) {
+        unsafe {
+            DwmSetWindowAttribute(
+                self.hwnd,
+                DWMWA_BORDER_COLOR,
+                &RGB(r,g,b) as *const u32 as *const c_void,
+                size_of::<u32>() as u32,
+            );
+        }
+    }
+
+    fn set_window_caption_color(&self, r: u8, g: u8, b: u8) {
+        unsafe {
+            DwmSetWindowAttribute(
+                self.hwnd,
+                DWMWA_CAPTION_COLOR,
+                &RGB(r,g,b) as *const u32 as *const c_void,
+                size_of::<u32>() as u32,
+            );
+        }
+    }
+
+    fn set_window_text_color(&self, r: u8, g: u8, b: u8) {
+        unsafe {
+            DwmSetWindowAttribute(
+                self.hwnd,
+                DWMWA_TEXT_COLOR,
+                &RGB(r,g,b) as *const u32 as *const c_void,
+                size_of::<u32>() as u32,
+            );
+        }
+    }
 }
 
 unsafe impl HasRawWindowHandle for _Window {
@@ -288,4 +324,8 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
             },
         }
     }
+}
+
+fn RGB(r: c_uchar, g: c_uchar, b: c_uchar) -> COLORREF {
+    (r as COLORREF | ((g as COLORREF) << 8) | ((b as COLORREF) << 16)) as COLORREF
 }
