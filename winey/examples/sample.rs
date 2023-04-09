@@ -1,5 +1,5 @@
 use winey::window::Window;
-use winey::{WindowEvent, WineyWindowImplementation};
+use winey::{KeyCode, WindowEvent, WineyWindowImplementation};
 
 fn main() {
     let window = Window::new("Hello World", 500, 500);

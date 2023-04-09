@@ -15,7 +15,7 @@ use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 use crate::platform::{WindowCorner, WindowExtForWindows};
 use crate::window::WindowInitialization;
-use crate::{WindowEvent, WineyWindowImplementation};
+use crate::{KeyCode, WindowEvent, WineyWindowImplementation};
 
 pub struct _Window {
     hinstance: HMODULE,
@@ -40,6 +40,12 @@ impl _Window {
                 match message.message {
                     WM_PAINT => {
                         callback(WindowEvent::RedrawRequested);
+                    }
+                    WM_KEYUP => {
+                        callback(WindowEvent::KeyUp(KeyCode(message.wParam as u32)))
+                    }
+                    WM_KEYDOWN => {
+                        callback(WindowEvent::KeyDown(KeyCode(message.wParam as u32)));
                     }
                     _ => {}
                 }
@@ -284,26 +290,6 @@ static mut MSG:MSG = MSG {
     time: 0,
     pt: POINT { x: 0, y: 0 },
 };
-
-// extern "system" fn wndproc(hWnd: HWND, Msg: u32, wParam: WPARAM, lParam: LPARAM) -> LRESULT {
-//     unsafe {
-//         match Msg {
-//             WM_CREATE => {
-//                 //set_msg(Msg, wParam, lParam);
-//                 0
-//             }
-//             WM_PAINT => {
-//                 //set_msg(Msg, wParam, lParam);
-//                 0
-//             }
-//             WM_DESTROY => {
-//                 //set_msg(Msg, wParam, lParam);
-//                 0
-//             }
-//             _ => DefWindowProcW(hWnd, Msg, wParam, lParam),
-//         }
-//     }
-// }
 
 extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     unsafe {
