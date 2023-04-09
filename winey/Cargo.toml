@@ -19,3 +19,8 @@ features = [
     "Win32_Graphics_Dwm"
 ]
 
+[target."cfg(unix)".dependencies.safex]
+version = "0.0.5"
+features = [
+    "xlib"
+]
