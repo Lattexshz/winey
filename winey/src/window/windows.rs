@@ -1,22 +1,23 @@
 use std::cell::{Ref, RefCell};
-use std::ffi::{c_int, c_uchar, c_void, OsStr};
+use std::ffi::{c_char, c_int, c_uchar, c_void, CStr, OsStr};
 use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
-use std::ptr::{addr_of, null, null_mut};
+use std::ptr::{addr_of, addr_of_mut, null, null_mut};
 use std::sync::Mutex;
 use std::time::Duration;
 use once_cell::unsync::{Lazy, OnceCell};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle, WindowsDisplayHandle};
 use windows_sys::{s, w};
+use windows_sys::core::{PSTR, PWSTR};
 use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
 use windows_sys::Win32::Graphics::Dwm::*;
 use windows_sys::Win32::Graphics::Gdi::ValidateRect;
 use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::Controls::MARGINS;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
-use crate::platform::{Rect, WindowCorner, WindowExtForWindows};
+use crate::platform::{WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
-use crate::{KeyCode, WindowEvent, WineyWindowImplementation};
+use crate::{KeyCode, WindowEvent, WindowRect, WineyWindowImplementation};
 
 pub struct _Window {
     hinstance: HMODULE,
@@ -207,6 +208,47 @@ impl WineyWindowImplementation for _Window {
             },
         }
     }
+
+    fn get_title(&self) -> String {
+        let mut buffer = [0u8; 1024];
+
+        unsafe {
+            GetWindowTextA(self.hwnd,addr_of_mut!(buffer) as PSTR,1024);
+            let mut del = 0;
+            for i in buffer {
+                if i == 0 {
+                    del = i;
+                    break;
+                }
+            }
+            let buffer = std::str::from_utf8(&buffer).unwrap().to_owned();
+            let buffer = buffer.trim_matches(char::from(0));
+            buffer.to_owned()
+        }
+    }
+
+    fn get_window_pos(&self) -> (u32, u32) {
+        unsafe {
+            let mut rect = std::mem::zeroed();
+            GetWindowRect(self.hwnd, &mut rect);
+            (rect.left.try_into().unwrap(), rect.top.try_into().unwrap())
+        }
+    }
+
+    fn get_window_rect(&self) -> WindowRect {
+        unsafe {
+            let rect = std::mem::zeroed();
+            GetWindowRect(self.hwnd,rect);
+
+            
+            WindowRect {
+                bottom: rect.bottom,
+                top: rect.top,
+                left: rect.left,
+                right: rect.right,
+            }
+        }
+    }
 }
 
 impl WindowExtForWindows for _Window {
@@ -275,7 +317,7 @@ impl WindowExtForWindows for _Window {
         }
     }
 
-    fn extend_frame_into_client_area(&self, rect: Rect) {
+    fn extend_frame_into_client_area(&self, rect: WindowRect) {
         unsafe {
             let margins = MARGINS {
                 cxLeftWidth: rect.left_width,

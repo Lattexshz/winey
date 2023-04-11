@@ -1,12 +1,12 @@
 use winey::window::Window;
-use winey::{KeyCode, WindowEvent, WineyWindowImplementation};
-use winey::platform::{Rect, WindowExtForWindows};
+use winey::{KeyCode, WindowEvent, WindowRect, WineyWindowImplementation};
+use winey::platform::WindowExtForWindows;
 
 fn main() {
     let window = Window::new("Hello World", 500, 500);
 
     window.set_window_border_color(255,0,0);
-    window.extend_frame_into_client_area(Rect {
+    window.extend_frame_into_client_area(WindowRect {
         left_width: 40,
         right_width: 40,
         top_height: 40,
@@ -20,6 +20,8 @@ fn main() {
     let mut b = 0;
 
     let mut increment:i16 = 1;
+
+    println!("{}",window.get_title());
 
     window.run(|event,control_flow| {
         match event {

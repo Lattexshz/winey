@@ -1,6 +1,13 @@
 pub mod window;
 pub mod platform;
 
+pub struct WindowRect {
+    pub bottom: i32,
+    pub top: i32,
+    pub left: i32,
+    pub right: i32
+}
+
 #[derive(Clone,Copy,Debug,PartialEq)]
 #[repr(C)]
 pub struct KeyCode(pub(crate) u32);
@@ -33,6 +40,7 @@ pub trait WineyWindowImplementation {
     fn show(&self);
     /// Hide window.
     fn hide(&self);
+    // Setters
     /// Maximize the window.
     fn set_maximize(&self,maximize: bool);
     /// Minimize the window
@@ -41,4 +49,9 @@ pub trait WineyWindowImplementation {
     fn set_title(&self,title: &str);
     /// Set window undecorated.
     fn set_undecorated(&self,undecorated: bool);
+
+    // Getters
+    fn get_title(&self) -> String;
+    fn get_window_pos(&self) -> (u32,u32);
+    fn get_window_rect(&self) -> WindowRect;
 }

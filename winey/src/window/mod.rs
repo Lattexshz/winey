@@ -1,7 +1,6 @@
 use std::cmp::max;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle};
-use crate::{WindowEvent, WineyWindowImplementation};
-use crate::platform::Rect;
+use crate::{WindowEvent, WindowRect, WineyWindowImplementation};
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -99,6 +98,18 @@ impl WineyWindowImplementation for Window {
     fn set_undecorated(&self, undecorated: bool) {
         self.inner.set_undecorated(undecorated);
     }
+
+    fn get_title(&self) -> String {
+        self.inner.get_title()
+    }
+
+    fn get_window_pos(&self) -> (u32, u32) {
+        self.inner.get_window_pos()
+    }
+
+    fn get_window_rect(&self) -> WindowRect {
+        self.inner.get_window_rect()
+    }
 }
 
 #[cfg(target_os = "windows")]
@@ -119,7 +130,7 @@ impl crate::platform::WindowExtForWindows for Window {
         self.inner.set_window_text_color(r,g,b);
     }
 
-    fn extend_frame_into_client_area(&self, rect: Rect) {
+    fn extend_frame_into_client_area(&self, rect: WindowRect) {
         self.inner.extend_frame_into_client_area(rect);
     }
 }
