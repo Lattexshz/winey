@@ -1,6 +1,7 @@
 use std::cmp::max;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle};
 use crate::{WindowEvent, WineyWindowImplementation};
+use crate::platform::Rect;
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -116,5 +117,9 @@ impl crate::platform::WindowExtForWindows for Window {
 
     fn set_window_text_color(&self, r: u8, g: u8, b: u8) {
         self.inner.set_window_text_color(r,g,b);
+    }
+
+    fn extend_frame_into_client_area(&self, rect: Rect) {
+        self.inner.extend_frame_into_client_area(rect);
     }
 }

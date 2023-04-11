@@ -12,8 +12,9 @@ use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, P
 use windows_sys::Win32::Graphics::Dwm::*;
 use windows_sys::Win32::Graphics::Gdi::ValidateRect;
 use windows_sys::Win32::System::LibraryLoader::*;
+use windows_sys::Win32::UI::Controls::MARGINS;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
-use crate::platform::{WindowCorner, WindowExtForWindows};
+use crate::platform::{Rect, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
 use crate::{KeyCode, WindowEvent, WineyWindowImplementation};
 
@@ -271,6 +272,19 @@ impl WindowExtForWindows for _Window {
                 &RGB(r,g,b) as *const u32 as *const c_void,
                 size_of::<u32>() as u32,
             );
+        }
+    }
+
+    fn extend_frame_into_client_area(&self, rect: Rect) {
+        unsafe {
+            let margins = MARGINS {
+                cxLeftWidth: rect.left_width,
+                cxRightWidth: rect.right_width,
+                cyTopHeight: rect.top_height,
+                cyBottomHeight: rect.bottom_height,
+            };
+
+            DwmExtendFrameIntoClientArea(self.hwnd,addr_of!(margins));
         }
     }
 }
