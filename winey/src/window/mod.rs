@@ -130,7 +130,7 @@ impl crate::platform::WindowExtForWindows for Window {
         self.inner.set_window_text_color(r,g,b);
     }
 
-    fn extend_frame_into_client_area(&self, rect: WindowRect) {
+    fn extend_frame_into_client_area(&self, rect: crate::platform::windows::Margin) {
         self.inner.extend_frame_into_client_area(rect);
     }
 }

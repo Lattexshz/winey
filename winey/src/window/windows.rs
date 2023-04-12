@@ -15,7 +15,7 @@ use windows_sys::Win32::Graphics::Gdi::ValidateRect;
 use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::Controls::MARGINS;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
-use crate::platform::{WindowCorner, WindowExtForWindows};
+use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
 use crate::{KeyCode, WindowEvent, WindowRect, WineyWindowImplementation};
 
@@ -242,10 +242,10 @@ impl WineyWindowImplementation for _Window {
 
             
             WindowRect {
-                bottom: rect.bottom,
-                top: rect.top,
-                left: rect.left,
-                right: rect.right,
+                bottom: (*rect).bottom,
+                top: (*rect).top,
+                left: (*rect).left,
+                right: (*rect).right,
             }
         }
     }
@@ -317,7 +317,7 @@ impl WindowExtForWindows for _Window {
         }
     }
 
-    fn extend_frame_into_client_area(&self, rect: WindowRect) {
+    fn extend_frame_into_client_area(&self, rect: Margin) {
         unsafe {
             let margins = MARGINS {
                 cxLeftWidth: rect.left_width,
