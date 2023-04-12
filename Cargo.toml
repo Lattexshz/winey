@@ -1,7 +1,6 @@
 [workspace]
 members = [
-    "winey",
-    "winey-dll"
+    "winey"
 ]
 
 [profile.release]
