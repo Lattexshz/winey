@@ -1,6 +1,6 @@
 use std::cmp::max;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle};
-use crate::{WindowEvent, WindowRect, WineyWindowImplementation};
+use crate::{CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -97,6 +97,18 @@ impl WineyWindowImplementation for Window {
 
     fn set_undecorated(&self, undecorated: bool) {
         self.inner.set_undecorated(undecorated);
+    }
+
+    fn set_window_level(&self, level: WindowLevel) {
+        self.inner.set_window_level(level);
+    }
+
+    fn set_window_type(&self, type_: WindowType) {
+        self.inner.set_window_type(type_)
+    }
+
+    fn set_cursor_icon(&self, icon: CursorIcon) {
+        self.inner.set_cursor_icon(icon);
     }
 
     fn get_title(&self) -> String {

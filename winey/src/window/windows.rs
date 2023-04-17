@@ -17,7 +17,7 @@ use windows_sys::Win32::UI::Controls::MARGINS;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
-use crate::{KeyCode, WindowEvent, WindowRect, WineyWindowImplementation};
+use crate::{CursorIcon, KeyCode, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 
 pub struct _Window {
     hinstance: HMODULE,
@@ -206,6 +206,50 @@ impl WineyWindowImplementation for _Window {
                     WS_OVERLAPPEDWINDOW as i32,
                 );
             },
+        }
+    }
+
+    fn set_window_level(&self, level: WindowLevel) {
+        match level {
+            WindowLevel::Normal => {
+                unsafe {
+                    SetWindowPos(self.hwnd, HWND_DESKTOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                }
+            }
+
+            WindowLevel::TopLevel => {
+                unsafe {
+                    SetWindowPos(self.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                }
+            }
+        }
+    }
+
+    fn set_window_type(&self, type_: WindowType) {
+        match type_ {
+            WindowType::Normal => {
+                unsafe {
+                    SetWindowLongW(self.hwnd, GWL_EXSTYLE, 0);
+                }
+            }
+            WindowType::Utility => {
+                unsafe {
+                    SetWindowLongW(self.hwnd, GWL_EXSTYLE, WS_EX_TOOLWINDOW as i32);
+                }
+            }
+        }
+    }
+
+    fn set_cursor_icon(&self, icon: CursorIcon) {
+        unsafe {
+            let icon = match icon {
+                CursorIcon::Arrow => LoadCursorW(0,IDC_ARROW),
+                CursorIcon::Hand => LoadCursorW(0,IDC_HAND),
+                CursorIcon::Help => LoadCursorW(0,IDC_HELP),
+                CursorIcon::Wait => LoadCursorW(0,IDC_WAIT)
+            };
+
+            SetClassLongPtrA(self.hwnd, GCLP_HCURSOR, icon as isize);
         }
     }
 

@@ -36,15 +36,20 @@ pub enum WindowEvent {
 }
 
 pub enum WindowLevel {
-    Normal
+    Normal,
+    TopLevel
 }
 
 pub enum WindowType {
+    Normal,
     Utility
 }
 
 pub enum CursorIcon {
-    Arrow
+    Arrow,
+    Hand,
+    Help,
+    Wait
 }
 
 pub trait WineyWindowImplementation {
@@ -61,10 +66,9 @@ pub trait WineyWindowImplementation {
     fn set_title(&self,title: &str);
     /// Set window undecorated.
     fn set_undecorated(&self,undecorated: bool);
-    fn set_fullscreen(&self,fullscreen: bool);
     fn set_window_level(&self,level: WindowLevel);
     fn set_window_type(&self,type_: WindowType);
-    fn set_cursor_icon(&self,icon: CurosrIcon);
+    fn set_cursor_icon(&self,icon: CursorIcon);
 
     // Getters
     fn get_title(&self) -> String;
