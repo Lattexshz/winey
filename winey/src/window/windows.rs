@@ -35,6 +35,7 @@ impl _Window {
 
         unsafe {
             loop {
+                callback(WindowEvent::Update,&mut control_flow);
                 match control_flow.flow {
                     Flow::Listen => {
                         GetMessageW(&mut message, 0, 0, 0);
