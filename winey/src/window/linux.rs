@@ -1,24 +1,27 @@
-use std::ffi::c_void;
-use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, XlibDisplayHandle, XlibWindowHandle};
-use safex::xlib::{AsRaw, Color, ColorMap, Window};
-use crate::{WindowEvent, WineyWindowImplementation};
 use crate::window::WindowInitialization;
-use crate::window::{ControlFlow,Flow};
+use crate::window::{ControlFlow, Flow};
+use crate::{WindowEvent, WineyWindowImplementation};
+use raw_window_handle::{
+    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, XlibDisplayHandle,
+    XlibWindowHandle,
+};
+use safex::xlib::{AsRaw, Color, ColorMap, Window};
+use std::ffi::c_void;
 
 pub struct _Window {
     window: safex::xlib::Window,
     screen: safex::xlib::Screen,
-    display: safex::xlib::Display
+    display: safex::xlib::Display,
 }
 
 impl _Window {
-    pub(crate) fn run<C: FnMut(WindowEvent,&mut ControlFlow)>(&self, mut callback: C) {
+    pub(crate) fn run<C: FnMut(WindowEvent, &mut ControlFlow)>(&self, mut callback: C) {
         let mut control_flow = ControlFlow::new(Flow::Listen);
-        self.window.run(|event,c| {
-            callback(crate::WindowEvent::Update,&mut control_flow);
+        self.window.run(|event, c| {
+            callback(crate::WindowEvent::Update, &mut control_flow);
             match event {
                 safex::xlib::WindowEvent::Expose => {
-                    callback(crate::WindowEvent::RedrawRequested,&mut control_flow);
+                    callback(crate::WindowEvent::RedrawRequested, &mut control_flow);
                 }
             }
         })
@@ -54,7 +57,9 @@ impl WindowInitialization for _Window {
         window.set_window_title(title);
 
         Self {
-            window,screen,display
+            window,
+            screen,
+            display,
         }
     }
 }
@@ -70,9 +75,7 @@ impl WineyWindowImplementation for _Window {
 
     fn set_maximize(&self, maximize: bool) {
         match maximize {
-            true => {
-                self.window.map()
-            }
+            true => self.window.map(),
             false => {
                 self.show();
             }
@@ -81,12 +84,8 @@ impl WineyWindowImplementation for _Window {
 
     fn set_minimize(&self, minimize: bool) {
         match minimize {
-            true => {
-                self.window.unmap()
-            }
-            false => {
-                self.window.map()
-            }
+            true => self.window.unmap(),
+            false => self.window.map(),
         }
     }
 
@@ -94,9 +93,7 @@ impl WineyWindowImplementation for _Window {
         self.window.set_window_title(title);
     }
 
-    fn set_undecorated(&self, undecorated: bool) {
-
-    }
+    fn set_undecorated(&self, undecorated: bool) {}
 }
 
 unsafe impl HasRawWindowHandle for _Window {

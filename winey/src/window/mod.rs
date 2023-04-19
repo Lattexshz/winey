@@ -1,6 +1,10 @@
-use std::cmp::max;
-use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle};
-use crate::{CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
+use crate::{
+    CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation,
+};
+use raw_window_handle::{
+    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
+};
+
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -19,45 +23,43 @@ pub use self::windows::*;
 
 pub enum Flow {
     Listen,
-    Exit(i32)
+    Exit(i32),
 }
 
 pub struct ControlFlow {
-    flow: Flow
+    flow: Flow,
 }
 
 impl ControlFlow {
     pub fn new(flow: Flow) -> Self {
-        Self {
-            flow
-        }
+        Self { flow }
     }
 
     pub fn listen(&mut self) {
         self.flow = Flow::Listen
     }
 
-    pub fn exit(&mut self,code: i32) {
+    pub fn exit(&mut self, code: i32) {
         self.flow = Flow::Exit(code);
     }
 }
 
 pub(crate) trait WindowInitialization {
-    fn new(title: &str,width:u32,height:u32) -> Self;
+    fn new(title: &str, width: u32, height: u32) -> Self;
 }
 
 pub struct Window {
-    inner: _Window
+    inner: _Window,
 }
 
 impl Window {
     pub fn new(title: &str, width: u32, height: u32) -> Self {
         Self {
-            inner: _Window::new(title,width,height)
+            inner: _Window::new(title, width, height),
         }
     }
 
-    pub fn run<C: FnMut(WindowEvent,&mut ControlFlow)>(&self, mut callback: C) {
+    pub fn run<C: FnMut(WindowEvent, &mut ControlFlow)>(&self, callback: C) {
         self.inner.run(callback);
     }
 }
@@ -130,8 +132,8 @@ impl crate::platform::WindowExtForWindows for Window {
         self.inner.set_window_corner_radius(corner);
     }
 
-    fn set_window_border_color(&self,r: u8,g: u8,b: u8) {
-        self.inner.set_window_border_color(r,g,b);
+    fn set_window_border_color(&self, r: u8, g: u8, b: u8) {
+        self.inner.set_window_border_color(r, g, b);
     }
 
     fn set_window_caption_color(&self, r: u8, g: u8, b: u8) {
@@ -139,7 +141,7 @@ impl crate::platform::WindowExtForWindows for Window {
     }
 
     fn set_window_text_color(&self, r: u8, g: u8, b: u8) {
-        self.inner.set_window_text_color(r,g,b);
+        self.inner.set_window_text_color(r, g, b);
     }
 
     fn extend_frame_into_client_area(&self, rect: crate::platform::windows::Margin) {
