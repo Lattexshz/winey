@@ -37,11 +37,10 @@ impl _Window {
         let mut control_flow = ControlFlow::new(Flow::Listen);
 
         unsafe {
-            loop {
-                callback(WindowEvent::Update, &mut control_flow);
-                match control_flow.flow {
-                    Flow::Listen => {
-                        GetMessageW(&mut message, 0, 0, 0);
+            match control_flow.flow {
+                Flow::Listen => {
+                    while GetMessageW(&mut message, 0, 0, 0) != 0 {
+                        callback(WindowEvent::Update, &mut control_flow);
                         TranslateMessage(&mut message);
                         DispatchMessageW(&message);
                         callback(WindowEvent::Update, &mut control_flow);
@@ -68,12 +67,11 @@ impl _Window {
                             }
                             _ => {}
                         }
-                    }
+                    };
+                }
 
-                    Flow::Exit(code) => {
-                        PostQuitMessage(code);
-                        break;
-                    }
+                Flow::Exit(code) => {
+                    PostQuitMessage(code);
                 }
             }
         }
