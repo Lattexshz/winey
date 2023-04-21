@@ -48,13 +48,9 @@ impl _Window {
                             WM_PAINT => {
                                 callback(WindowEvent::RedrawRequested, &mut control_flow);
                             }
-                            WM_KEYUP => callback(
-                                WindowEvent::KeyUp(KeyCode(message.wParam as u32)),
-                                &mut control_flow,
-                            ),
                             WM_KEYDOWN => {
                                 callback(
-                                    WindowEvent::KeyDown(KeyCode(message.wParam as u32)),
+                                    WindowEvent::KeyEvent(KeyCode(message.wParam as u32)),
                                     &mut control_flow,
                                 );
                             }

@@ -1,5 +1,6 @@
 pub mod platform;
 pub mod window;
+pub mod keyboard;
 
 pub struct WindowRect {
     pub bottom: i32,
@@ -27,8 +28,7 @@ impl Into<u32> for KeyCode {
 pub enum WindowEvent {
     /// Occurs at every frame.
     Update,
-    KeyDown(KeyCode),
-    KeyUp(KeyCode),
+    KeyEvent(KeyCode),
     /// Occurs when the window is asked to redraw.
     RedrawRequested,
     /// Occurs when a window is about to be closed.

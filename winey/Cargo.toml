@@ -20,7 +20,8 @@ features = [
     "Win32_System_LibraryLoader",
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Dwm",
-    "Win32_UI_Controls"
+    "Win32_UI_Controls",
+    "Win32_UI_Input_KeyboardAndMouse"
 ]
 
 [target."cfg(unix)".dependencies.safex]
