@@ -15,6 +15,7 @@ pub(crate) use self::windows::*;
 
 pub type VirtualKeyCode = u32;
 
+pub const KEY_NULL: VirtualKeyCode = 0x0;
 pub const KEY_A: VirtualKeyCode = vk::KEY_A as VirtualKeyCode;
 pub const KEY_B: VirtualKeyCode = vk::KEY_B as VirtualKeyCode;
 pub const KEY_C: VirtualKeyCode = vk::KEY_C as VirtualKeyCode;
@@ -42,9 +43,9 @@ pub const KEY_X: VirtualKeyCode = vk::KEY_X as VirtualKeyCode;
 pub const KEY_Y: VirtualKeyCode = vk::KEY_Y as VirtualKeyCode;
 pub const KEY_Z: VirtualKeyCode = vk::KEY_Z as VirtualKeyCode;
 
-pub const KEY_BACKSPACE: VirtualKeyCode = vk::KEY_BACKSPACE as VirtualkeyCode;
+pub const KEY_BACKSPACE: VirtualKeyCode = vk::KEY_BACKSPACE as VirtualKeyCode;
 pub const KEY_SHIFT:VirtualKeyCode = vk::KEY_SHIFT as VirtualKeyCode;
-pub const KEY_TAB: VirtualKeyCode = vk::KEY_TAB as VirtualkeyCode;
+pub const KEY_TAB: VirtualKeyCode = vk::KEY_TAB as VirtualKeyCode;
 
 pub fn get_key_name(code: VirtualKeyCode) -> String {
     _get_key_name(code)

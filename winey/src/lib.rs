@@ -1,3 +1,5 @@
+use crate::keyboard::VirtualKeyCode;
+
 pub mod platform;
 pub mod window;
 pub mod keyboard;
@@ -9,26 +11,10 @@ pub struct WindowRect {
     pub right: i32,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[repr(C)]
-pub struct KeyCode(pub(crate) u32);
-
-impl Into<char> for KeyCode {
-    fn into(self) -> char {
-        char::from_u32(self.0).unwrap()
-    }
-}
-
-impl Into<u32> for KeyCode {
-    fn into(self) -> u32 {
-        self.0
-    }
-}
-
 pub enum WindowEvent {
     /// Occurs at every frame.
     Update,
-    KeyEvent(KeyCode),
+    KeyEvent(VirtualKeyCode),
     /// Occurs when the window is asked to redraw.
     RedrawRequested,
     /// Occurs when a window is about to be closed.

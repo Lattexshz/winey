@@ -1,7 +1,7 @@
 use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
 use crate::{
-    CursorIcon, KeyCode, WindowEvent, WindowLevel, WindowRect, WindowType,
+    CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType,
     WineyWindowImplementation,
 };
 use raw_window_handle::{
@@ -21,7 +21,9 @@ use windows_sys::Win32::Graphics::Dwm::*;
 
 use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::Controls::MARGINS;
+use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetKeyboardState;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
+use crate::keyboard::*;
 
 
 pub struct _Window {
@@ -43,16 +45,20 @@ impl _Window {
                         callback(WindowEvent::Update, &mut control_flow);
                         TranslateMessage(&mut message);
                         DispatchMessageW(&message);
-                        callback(WindowEvent::Update, &mut control_flow);
+
+                        let state = KeyBoardState::get();
+                        let code = state.extract();
+
+                        if code != KEY_NULL {
+                            callback(
+                                WindowEvent::KeyEvent(code),
+                                &mut control_flow,
+                            );
+                        }
+
                         match message.message {
                             WM_PAINT => {
                                 callback(WindowEvent::RedrawRequested, &mut control_flow);
-                            }
-                            WM_KEYDOWN => {
-                                callback(
-                                    WindowEvent::KeyEvent(KeyCode(message.wParam as u32)),
-                                    &mut control_flow,
-                                );
                             }
                             _ => {}
                         }
@@ -67,6 +73,7 @@ impl _Window {
                 }
 
                 Flow::Exit(code) => {
+                    println!("Exit");
                     PostQuitMessage(code);
                 }
             }
@@ -398,4 +405,49 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
 
 fn RGB(r: c_uchar, g: c_uchar, b: c_uchar) -> COLORREF {
     (r as COLORREF | ((g as COLORREF) << 8) | ((b as COLORREF) << 16)) as COLORREF
+}
+
+const VK_ARRAY: [VirtualKeyCode; 29] = [
+  KEY_A,KEY_B,KEY_C,KEY_D,KEY_E,KEY_F,KEY_G,KEY_H,KEY_I,KEY_J,KEY_K,KEY_L,KEY_M,KEY_N,KEY_O,KEY_P,KEY_Q,KEY_R,KEY_S,KEY_T,KEY_U,KEY_V,KEY_W,KEY_X,KEY_Y,KEY_Z,KEY_BACKSPACE,KEY_SHIFT,KEY_TAB,
+];
+
+pub struct KeyBoardState {
+    state: [u8;256]
+}
+
+impl KeyBoardState {
+    pub fn get() -> Self {
+        unsafe {
+            let mut state: [u8;256] = Array::default().state;
+            GetKeyboardState(state.as_mut_ptr());
+
+            Self {
+                state
+            }
+        }
+    }
+
+    pub fn extract(&self) -> VirtualKeyCode {
+        let mut code = KEY_NULL;
+
+        for i in VK_ARRAY {
+            if self.state[i as usize] & 0x80 == 128 {
+                code += i;
+            }
+        }
+
+        code
+    }
+}
+
+struct Array {
+    state: [u8;256]
+}
+
+impl Default for Array {
+    fn default() -> Self {
+        Self {
+            state: [0;256],
+        }
+    }
 }

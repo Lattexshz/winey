@@ -1,6 +1,7 @@
 use winey::platform::{WindowCorner, WindowExtForWindows};
 use winey::window::Window;
 use winey::{WindowEvent, WineyWindowImplementation};
+use winey::keyboard::*;
 
 // Note Some of the methods used in this sample may not work properly without Windows 11.
 
@@ -17,6 +18,13 @@ fn main() {
     window.run(|event, control_flow| match event {
         WindowEvent::CloseRequested => {
             control_flow.exit(0);
+        }
+
+        WindowEvent::KeyEvent(code) => {
+            println!("{}",code);
+            if code == 131 {
+                control_flow.exit(0);
+            }
         }
 
         _ => {}
