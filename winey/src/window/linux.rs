@@ -1,6 +1,6 @@
 use crate::window::WindowInitialization;
 use crate::window::{ControlFlow, Flow};
-use crate::{WindowEvent, WineyWindowImplementation};
+use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, XlibDisplayHandle,
     XlibWindowHandle,
@@ -94,6 +94,34 @@ impl WineyWindowImplementation for _Window {
     }
 
     fn set_undecorated(&self, undecorated: bool) {}
+
+    fn set_window_level(&self, level: WindowLevel) {
+        todo!()
+    }
+
+    fn set_window_type(&self, type_: WindowType) {
+        todo!()
+    }
+
+    fn set_cursor(&self, cursor: Cursor) {
+        todo!()
+    }
+
+    fn get_title(&self) -> String {
+        todo!()
+    }
+
+    fn get_window_pos(&self) -> (u32, u32) {
+        todo!()
+    }
+
+    fn get_window_rect(&self) -> WindowRect {
+        todo!()
+    }
+
+    fn get_current_cursor(&self) -> Cursor {
+        todo!()
+    }
 }
 
 unsafe impl HasRawWindowHandle for _Window {
