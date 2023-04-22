@@ -1,5 +1,3 @@
-
-
 pub enum WindowCorner {
     DoNotRound,
     SmallRound,

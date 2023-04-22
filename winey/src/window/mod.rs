@@ -1,8 +1,9 @@
-use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
+use crate::{
+    Cursor, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation,
+};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };
-
 
 #[cfg(target_os = "linux")]
 pub mod linux;

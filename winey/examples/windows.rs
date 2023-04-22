@@ -1,7 +1,7 @@
+
 use winey::platform::{WindowCorner, WindowExtForWindows};
 use winey::window::Window;
 use winey::{Cursor, CursorIcon, WindowEvent, WineyWindowImplementation};
-use winey::keyboard::*;
 
 // Note Some of the methods used in this sample may not work properly without Windows 11.
 
@@ -28,7 +28,7 @@ fn main() {
         }
 
         WindowEvent::KeyEvent(code) => {
-            println!("{}",code);
+            println!("{}", code);
             if code == 131 {
                 control_flow.exit(0);
             }

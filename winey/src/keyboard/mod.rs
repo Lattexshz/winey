@@ -44,7 +44,7 @@ pub const KEY_Y: VirtualKeyCode = vk::KEY_Y as VirtualKeyCode;
 pub const KEY_Z: VirtualKeyCode = vk::KEY_Z as VirtualKeyCode;
 
 pub const KEY_BACKSPACE: VirtualKeyCode = vk::KEY_BACKSPACE as VirtualKeyCode;
-pub const KEY_SHIFT:VirtualKeyCode = vk::KEY_SHIFT as VirtualKeyCode;
+pub const KEY_SHIFT: VirtualKeyCode = vk::KEY_SHIFT as VirtualKeyCode;
 pub const KEY_TAB: VirtualKeyCode = vk::KEY_TAB as VirtualKeyCode;
 
 pub fn get_key_name(code: VirtualKeyCode) -> String {

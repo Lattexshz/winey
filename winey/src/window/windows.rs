@@ -1,6 +1,8 @@
 use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
-use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
+use crate::{
+    Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation,
+};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle,
     WindowsDisplayHandle,
@@ -11,17 +13,15 @@ use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
 use std::ptr::{addr_of, addr_of_mut};
 
-
-use windows_sys::core::{PSTR};
+use windows_sys::core::PSTR;
 use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
 use windows_sys::Win32::Graphics::Dwm::*;
 
+use crate::keyboard::*;
 use windows_sys::Win32::System::LibraryLoader::*;
 use windows_sys::Win32::UI::Controls::MARGINS;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetKeyboardState;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
-use crate::keyboard::*;
-
 
 pub struct _Window {
     hinstance: HMODULE,
@@ -47,10 +47,7 @@ impl _Window {
                         let code = state.extract();
 
                         if code != KEY_NULL {
-                            callback(
-                                WindowEvent::KeyEvent(code),
-                                &mut control_flow,
-                            );
+                            callback(WindowEvent::KeyEvent(code), &mut control_flow);
                         }
 
                         match message.message {
@@ -66,7 +63,7 @@ impl _Window {
                             }
                             _ => {}
                         }
-                    };
+                    }
                 }
 
                 Flow::Exit(code) => {
@@ -233,7 +230,7 @@ impl WineyWindowImplementation for _Window {
 
             SetClassLongPtrA(self.hwnd, GCLP_HCURSOR, icon as isize);
 
-            SetCursorPos(cursor.x as i32,cursor.y as i32);
+            SetCursorPos(cursor.x as i32, cursor.y as i32);
         }
     }
 
@@ -278,18 +275,18 @@ impl WineyWindowImplementation for _Window {
     }
 
     fn get_current_cursor(&self) -> Cursor {
-        let mut point = unsafe { std::mem::zeroed() };
+        let point = unsafe { std::mem::zeroed() };
         unsafe {
             let h_cursor = GetCursor();
             let mut cursor = CursorIcon::Arrow;
 
-            if h_cursor == LoadCursorW(0,IDC_ARROW) {
+            if h_cursor == LoadCursorW(0, IDC_ARROW) {
                 cursor = CursorIcon::Arrow
-            } else if h_cursor == LoadCursorW(0,IDC_HAND) {
+            } else if h_cursor == LoadCursorW(0, IDC_HAND) {
                 cursor = CursorIcon::Hand;
-            } else if h_cursor == LoadCursorW(0,IDC_HELP) {
+            } else if h_cursor == LoadCursorW(0, IDC_HELP) {
                 cursor = CursorIcon::Help;
-            } else if h_cursor == LoadCursorW(0,IDC_WAIT) {
+            } else if h_cursor == LoadCursorW(0, IDC_WAIT) {
                 cursor = CursorIcon::Wait;
             };
 
@@ -432,22 +429,48 @@ fn RGB(r: c_uchar, g: c_uchar, b: c_uchar) -> COLORREF {
 }
 
 const VK_ARRAY: [VirtualKeyCode; 29] = [
-  KEY_A,KEY_B,KEY_C,KEY_D,KEY_E,KEY_F,KEY_G,KEY_H,KEY_I,KEY_J,KEY_K,KEY_L,KEY_M,KEY_N,KEY_O,KEY_P,KEY_Q,KEY_R,KEY_S,KEY_T,KEY_U,KEY_V,KEY_W,KEY_X,KEY_Y,KEY_Z,KEY_BACKSPACE,KEY_SHIFT,KEY_TAB,
+    KEY_A,
+    KEY_B,
+    KEY_C,
+    KEY_D,
+    KEY_E,
+    KEY_F,
+    KEY_G,
+    KEY_H,
+    KEY_I,
+    KEY_J,
+    KEY_K,
+    KEY_L,
+    KEY_M,
+    KEY_N,
+    KEY_O,
+    KEY_P,
+    KEY_Q,
+    KEY_R,
+    KEY_S,
+    KEY_T,
+    KEY_U,
+    KEY_V,
+    KEY_W,
+    KEY_X,
+    KEY_Y,
+    KEY_Z,
+    KEY_BACKSPACE,
+    KEY_SHIFT,
+    KEY_TAB,
 ];
 
 pub struct KeyBoardState {
-    state: [u8;256]
+    state: [u8; 256],
 }
 
 impl KeyBoardState {
     pub fn get() -> Self {
         unsafe {
-            let mut state: [u8;256] = Array::default().state;
+            let mut state: [u8; 256] = Array::default().state;
             GetKeyboardState(state.as_mut_ptr());
 
-            Self {
-                state
-            }
+            Self { state }
         }
     }
 
@@ -465,13 +488,11 @@ impl KeyBoardState {
 }
 
 struct Array {
-    state: [u8;256]
+    state: [u8; 256],
 }
 
 impl Default for Array {
     fn default() -> Self {
-        Self {
-            state: [0;256],
-        }
+        Self { state: [0; 256] }
     }
 }

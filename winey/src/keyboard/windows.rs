@@ -1,9 +1,11 @@
-use std::ffi::{c_char, CStr};
-use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC};
 use crate::keyboard::VirtualKeyCode;
+use std::ffi::{c_char, CStr};
+use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
+    GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC,
+};
 
 pub(crate) mod vk {
-    use std::ffi::{c_char, c_int, CStr};
+    use std::ffi::{c_int};
     use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
 
     pub const KEY_A: c_int = 0x41;
@@ -38,15 +40,16 @@ pub(crate) mod vk {
     pub const KEY_SHIFT: VIRTUAL_KEY = VK_SHIFT;
 }
 
-
-
 pub fn _get_key_name(code: VirtualKeyCode) -> String {
     unsafe {
-        let mut name: [u8;32] = Default::default();
-        let mut ptr = name.as_mut_ptr();
+        let mut name: [u8; 32] = Default::default();
+        let ptr = name.as_mut_ptr();
         let code = MapVirtualKeyA(code, MAPVK_VK_TO_VSC);
-        GetKeyNameTextA((code << 16) as i32,ptr,32);
-        let string = CStr::from_ptr(ptr as *const c_char).to_str().unwrap().to_owned();
+        GetKeyNameTextA((code << 16) as i32, ptr, 32);
+        let string = CStr::from_ptr(ptr as *const c_char)
+            .to_str()
+            .unwrap()
+            .to_owned();
         string
     }
 }

@@ -1,8 +1,8 @@
 use crate::keyboard::VirtualKeyCode;
 
+pub mod keyboard;
 pub mod platform;
 pub mod window;
-pub mod keyboard;
 
 pub struct WindowRect {
     pub bottom: i32,
@@ -31,7 +31,7 @@ pub enum WindowType {
     Utility,
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum CursorIcon {
     Arrow,
     Hand,
@@ -39,11 +39,11 @@ pub enum CursorIcon {
     Wait,
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Cursor {
     pub icon: CursorIcon,
     pub x: u32,
-    pub y:u32
+    pub y: u32,
 }
 
 pub trait WineyWindowImplementation {
