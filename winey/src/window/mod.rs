@@ -1,6 +1,4 @@
-use crate::{
-    CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation,
-};
+use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };
@@ -109,8 +107,8 @@ impl WineyWindowImplementation for Window {
         self.inner.set_window_type(type_)
     }
 
-    fn set_cursor_icon(&self, icon: CursorIcon) {
-        self.inner.set_cursor_icon(icon);
+    fn set_cursor(&self, icon: Cursor) {
+        self.inner.set_cursor(icon);
     }
 
     fn get_title(&self) -> String {
@@ -123,6 +121,10 @@ impl WineyWindowImplementation for Window {
 
     fn get_window_rect(&self) -> WindowRect {
         self.inner.get_window_rect()
+    }
+
+    fn get_current_cursor(&self) -> Cursor {
+        self.inner.get_current_cursor()
     }
 }
 

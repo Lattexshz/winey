@@ -31,11 +31,19 @@ pub enum WindowType {
     Utility,
 }
 
+#[derive(Clone,Copy,Debug)]
 pub enum CursorIcon {
     Arrow,
     Hand,
     Help,
     Wait,
+}
+
+#[derive(Clone,Copy,Debug)]
+pub struct Cursor {
+    pub icon: CursorIcon,
+    pub x: u32,
+    pub y:u32
 }
 
 pub trait WineyWindowImplementation {
@@ -54,10 +62,11 @@ pub trait WineyWindowImplementation {
     fn set_undecorated(&self, undecorated: bool);
     fn set_window_level(&self, level: WindowLevel);
     fn set_window_type(&self, type_: WindowType);
-    fn set_cursor_icon(&self, icon: CursorIcon);
+    fn set_cursor(&self, cursor: Cursor);
 
     // Getters
     fn get_title(&self) -> String;
     fn get_window_pos(&self) -> (u32, u32);
     fn get_window_rect(&self) -> WindowRect;
+    fn get_current_cursor(&self) -> Cursor;
 }

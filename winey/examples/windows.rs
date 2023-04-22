@@ -1,6 +1,6 @@
 use winey::platform::{WindowCorner, WindowExtForWindows};
 use winey::window::Window;
-use winey::{WindowEvent, WineyWindowImplementation};
+use winey::{Cursor, CursorIcon, WindowEvent, WineyWindowImplementation};
 use winey::keyboard::*;
 
 // Note Some of the methods used in this sample may not work properly without Windows 11.
@@ -13,6 +13,13 @@ fn main() {
     window.set_window_caption_color(0, 0, 0);
     window.set_window_text_color(255, 255, 255);
 
+    let cursor = Cursor {
+        icon: CursorIcon::Wait,
+        x: 50,
+        y: 80,
+    };
+
+    window.set_cursor(cursor);
     window.show();
 
     window.run(|event, control_flow| match event {

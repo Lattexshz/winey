@@ -1,9 +1,6 @@
 use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
-use crate::{
-    CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType,
-    WineyWindowImplementation,
-};
+use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle,
     WindowsDisplayHandle,
@@ -225,9 +222,9 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn set_cursor_icon(&self, icon: CursorIcon) {
+    fn set_cursor(&self, cursor: Cursor) {
         unsafe {
-            let icon = match icon {
+            let icon = match cursor.icon {
                 CursorIcon::Arrow => LoadCursorW(0, IDC_ARROW),
                 CursorIcon::Hand => LoadCursorW(0, IDC_HAND),
                 CursorIcon::Help => LoadCursorW(0, IDC_HELP),
@@ -235,6 +232,8 @@ impl WineyWindowImplementation for _Window {
             };
 
             SetClassLongPtrA(self.hwnd, GCLP_HCURSOR, icon as isize);
+
+            SetCursorPos(cursor.x as i32,cursor.y as i32);
         }
     }
 
@@ -274,6 +273,31 @@ impl WineyWindowImplementation for _Window {
                 top: (*rect).top,
                 left: (*rect).left,
                 right: (*rect).right,
+            }
+        }
+    }
+
+    fn get_current_cursor(&self) -> Cursor {
+        let mut point = unsafe { std::mem::zeroed() };
+        unsafe {
+            let h_cursor = GetCursor();
+            let mut cursor = CursorIcon::Arrow;
+
+            if h_cursor == LoadCursorW(0,IDC_ARROW) {
+                cursor = CursorIcon::Arrow
+            } else if h_cursor == LoadCursorW(0,IDC_HAND) {
+                cursor = CursorIcon::Hand;
+            } else if h_cursor == LoadCursorW(0,IDC_HELP) {
+                cursor = CursorIcon::Help;
+            } else if h_cursor == LoadCursorW(0,IDC_WAIT) {
+                cursor = CursorIcon::Wait;
+            };
+
+            GetCursorPos(point);
+            Cursor {
+                icon: cursor,
+                x: (*point).x as u32,
+                y: (*point).y as u32,
             }
         }
     }
