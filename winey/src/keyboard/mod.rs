@@ -13,6 +13,13 @@ pub(crate) mod windows;
 #[cfg(target_os = "windows")]
 pub(crate) use self::windows::*;
 
+#[derive(Clone,Copy,Debug)]
+pub enum KeyState {
+    None,
+    Downed,
+    Pressing
+}
+
 pub type VirtualKeyCode = u32;
 
 pub const KEY_NULL: VirtualKeyCode = 0x0;
@@ -49,4 +56,8 @@ pub const KEY_TAB: VirtualKeyCode = vk::KEY_TAB as VirtualKeyCode;
 
 pub fn get_key_name(code: VirtualKeyCode) -> String {
     _get_key_name(code)
+}
+
+pub fn get_key_state(code: VirtualKeyCode) -> KeyState {
+    _get_key_state(code)
 }

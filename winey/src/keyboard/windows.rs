@@ -1,8 +1,8 @@
-use crate::keyboard::VirtualKeyCode;
+use std::cell::{Cell, OnceCell, RefCell};
+use crate::keyboard::{KeyState, VirtualKeyCode};
 use std::ffi::{c_char, CStr};
-use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
-    GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC,
-};
+use std::sync::{Mutex, OnceLock};
+use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC};
 
 pub(crate) mod vk {
     use std::ffi::{c_int};
@@ -51,5 +51,20 @@ pub fn _get_key_name(code: VirtualKeyCode) -> String {
             .unwrap()
             .to_owned();
         string
+    }
+}
+
+pub fn _get_key_state(code: VirtualKeyCode) -> KeyState {
+    unsafe {
+        let mut state = KeyState::None;
+        let result = GetAsyncKeyState(code as i32) as u16;
+        if result == 0 {
+            state = KeyState::None;
+        } else if (result & 0x01) != 0 {
+            state = KeyState::Downed;
+        } else if (result & 0xff00) != 0 {
+            state = KeyState::Pressing;
+        };
+        state
     }
 }

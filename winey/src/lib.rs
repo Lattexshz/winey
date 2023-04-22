@@ -1,3 +1,5 @@
+#![feature(once_cell)]
+
 use crate::keyboard::VirtualKeyCode;
 
 pub mod keyboard;

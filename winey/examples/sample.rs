@@ -1,5 +1,6 @@
 use winey::window::Window;
 use winey::{WindowEvent, WineyWindowImplementation};
+use winey::keyboard::{get_key_name, get_key_state};
 
 fn main() {
     let window = Window::new("Hello World", 500, 500);
@@ -8,7 +9,11 @@ fn main() {
 
     window.run(|event, control_flow| match event {
         WindowEvent::CloseRequested => {
-            control_flow.exit(0);
+            std::process::exit(0);
+        }
+
+        WindowEvent::KeyEvent(code) => {
+            println!("Name: {} State: {:?}",get_key_name(code),get_key_state(code))
         }
 
         _ => {}
