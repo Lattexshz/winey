@@ -1,11 +1,13 @@
-use std::cell::{Cell, OnceCell, RefCell};
 use crate::keyboard::{KeyState, VirtualKeyCode};
+
 use std::ffi::{c_char, CStr};
-use std::sync::{Mutex, OnceLock};
-use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC};
+
+use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
+    GetAsyncKeyState, GetKeyNameTextA, MapVirtualKeyA, MAPVK_VK_TO_VSC,
+};
 
 pub(crate) mod vk {
-    use std::ffi::{c_int};
+    use std::ffi::c_int;
     use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
 
     pub const KEY_A: c_int = 0x41;

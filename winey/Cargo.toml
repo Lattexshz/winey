@@ -26,6 +26,13 @@ features = [
 
 [target."cfg(unix)".dependencies.safex]
 version = "0.0.5"
+git = "https://github.com/Lattexshz/SafeX"
+features = [
+    "xlib"
+]
+
+[target."cfg(unix)".dependencies.x11]
+version = "2.21.0"
 features = [
     "xlib"
 ]

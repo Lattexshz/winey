@@ -1,7 +1,7 @@
 use crate::keyboard::{KeyState, VirtualKeyCode};
 
 pub(crate) mod vk {
-    use std::ffi::{c_int};
+    use std::ffi::c_int;
     pub const KEY_A: c_int = 0;
     pub const KEY_B: c_int = 1;
     pub const KEY_C: c_int = 2;
@@ -34,10 +34,10 @@ pub(crate) mod vk {
     pub const KEY_SHIFT: c_int = 0;
 }
 
-pub fn _get_key_name(code: VirtualKeyCode) -> String {
+pub fn _get_key_name(_code: VirtualKeyCode) -> String {
     "".to_string()
 }
 
-pub fn _get_key_state(code: VirtualKeyCode) -> KeyState {
+pub fn _get_key_state(_code: VirtualKeyCode) -> KeyState {
     KeyState::None
 }

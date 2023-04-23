@@ -1,4 +1,3 @@
-
 use winey::platform::{WindowCorner, WindowExtForWindows};
 use winey::window::Window;
 use winey::{Cursor, CursorIcon, WindowEvent, WineyWindowImplementation};
@@ -12,6 +11,9 @@ fn main() {
     window.set_window_corner_radius(WindowCorner::DoNotRound);
     window.set_window_caption_color(0, 0, 0);
     window.set_window_text_color(255, 255, 255);
+
+    let rect = window.get_window_rect();
+    println!("{}", rect.left);
 
     let cursor = Cursor {
         icon: CursorIcon::Wait,

@@ -14,7 +14,9 @@ use std::os::windows::ffi::OsStrExt;
 use std::ptr::{addr_of, addr_of_mut};
 
 use windows_sys::core::PSTR;
-use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, WPARAM};
+use windows_sys::Win32::Foundation::{
+    COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM,
+};
 use windows_sys::Win32::Graphics::Dwm::*;
 
 use crate::keyboard::*;
@@ -76,7 +78,7 @@ impl _Window {
 }
 
 impl WindowInitialization for _Window {
-    fn new(title: &str, _width: u32, _height: u32) -> Self {
+    fn new(title: &str, width: u32, height: u32) -> Self {
         unsafe {
             SetProcessDPIAware();
         }
@@ -117,8 +119,8 @@ impl WindowInitialization for _Window {
                 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
+                width as i32,
+                height as i32,
                 0,
                 0,
                 hinstance,
@@ -262,14 +264,20 @@ impl WineyWindowImplementation for _Window {
 
     fn get_window_rect(&self) -> WindowRect {
         unsafe {
-            let rect = std::mem::zeroed();
-            GetWindowRect(self.hwnd, rect);
+            let mut rect = RECT {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+            };
+
+            GetWindowRect(self.hwnd, &mut rect);
 
             WindowRect {
-                bottom: (*rect).bottom,
-                top: (*rect).top,
-                left: (*rect).left,
-                right: (*rect).right,
+                bottom: rect.bottom,
+                top: rect.top,
+                left: rect.left,
+                right: rect.right,
             }
         }
     }

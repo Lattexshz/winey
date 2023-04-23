@@ -17,7 +17,7 @@ pub struct _Window {
 impl _Window {
     pub(crate) fn run<C: FnMut(WindowEvent, &mut ControlFlow)>(&self, mut callback: C) {
         let mut control_flow = ControlFlow::new(Flow::Listen);
-        self.window.run(|event, c| {
+        self.window.run(|event, _c| {
             callback(crate::WindowEvent::Update, &mut control_flow);
             match event {
                 safex::xlib::WindowEvent::Expose => {
@@ -93,30 +93,37 @@ impl WineyWindowImplementation for _Window {
         self.window.set_window_title(title);
     }
 
-    fn set_undecorated(&self, undecorated: bool) {}
+    fn set_undecorated(&self, _undecorated: bool) {}
 
-    fn set_window_level(&self, level: WindowLevel) {
+    fn set_window_level(&self, _level: WindowLevel) {
         todo!()
     }
 
-    fn set_window_type(&self, type_: WindowType) {
+    fn set_window_type(&self, _type_: WindowType) {
         todo!()
     }
 
-    fn set_cursor(&self, cursor: Cursor) {
+    fn set_cursor(&self, _cursor: Cursor) {
         todo!()
     }
 
     fn get_title(&self) -> String {
-        todo!()
+        self.window.get_window_title()
     }
 
     fn get_window_pos(&self) -> (u32, u32) {
-        todo!()
+        let geometry = self.window.get_geometry();
+        (geometry.x as u32, geometry.y as u32)
     }
 
     fn get_window_rect(&self) -> WindowRect {
-        todo!()
+        let geometry = self.window.get_geometry();
+        WindowRect {
+            bottom: geometry.y + (geometry.height as i32),
+            top: geometry.y,
+            left: geometry.x,
+            right: geometry.x + (geometry.height as i32),
+        }
     }
 
     fn get_current_cursor(&self) -> Cursor {
@@ -135,7 +142,7 @@ unsafe impl HasRawWindowHandle for _Window {
 unsafe impl HasRawDisplayHandle for _Window {
     fn raw_display_handle(&self) -> RawDisplayHandle {
         let mut handle = XlibDisplayHandle::empty();
-        handle.screen = self.screen.as_raw();
+        handle.screen = unsafe { x11::xlib::XScreenNumberOfScreen(self.screen.as_raw()) };
         handle.display = self.display.as_raw() as *mut c_void;
         RawDisplayHandle::Xlib(handle)
     }

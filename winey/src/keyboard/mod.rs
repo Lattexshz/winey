@@ -13,11 +13,11 @@ pub(crate) mod windows;
 #[cfg(target_os = "windows")]
 pub(crate) use self::windows::*;
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum KeyState {
     None,
     Downed,
-    Pressing
+    Pressing,
 }
 
 pub type VirtualKeyCode = u32;
