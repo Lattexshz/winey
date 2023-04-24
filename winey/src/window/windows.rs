@@ -12,6 +12,8 @@ use std::ffi::{c_uchar, c_void, OsStr};
 use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
 use std::ptr::{addr_of, addr_of_mut};
+use std::sync::{Arc, Mutex};
+use once_cell::sync::Lazy;
 
 use windows_sys::core::PSTR;
 use windows_sys::Win32::Foundation::{
@@ -38,39 +40,42 @@ impl _Window {
         let mut control_flow = ControlFlow::new(Flow::Listen);
 
         unsafe {
-            match control_flow.flow {
-                Flow::Listen => {
-                    while GetMessageW(&mut message, 0, 0, 0) != 0 {
-                        callback(WindowEvent::Update, &mut control_flow);
-                        TranslateMessage(&mut message);
-                        DispatchMessageW(&message);
+            loop {
+                callback(WindowEvent::Update, &mut control_flow);
+                match control_flow.flow {
+                    Flow::Listen => {
+                        GetMessageW(&mut message, 0, 0, 0);
+                            TranslateMessage(&mut message);
+                            DispatchMessageW(&message);
 
-                        let state = KeyBoardState::get();
-                        let code = state.extract();
+                            let state = KeyBoardState::get();
+                            let code = state.extract();
 
-                        if code != KEY_NULL {
-                            callback(WindowEvent::KeyEvent(code), &mut control_flow);
-                        }
-
-                        match message.message {
-                            WM_PAINT => {
-                                callback(WindowEvent::RedrawRequested, &mut control_flow);
+                            if code != KEY_NULL {
+                                callback(WindowEvent::KeyEvent(code), &mut control_flow);
                             }
-                            _ => {}
-                        }
 
-                        match MSG.message {
-                            WM_CLOSE => {
-                                callback(WindowEvent::CloseRequested, &mut control_flow);
+                            match message.message {
+                                WM_PAINT => {
+                                    callback(WindowEvent::RedrawRequested, &mut control_flow);
+                                }
+                                _ => {}
                             }
-                            _ => {}
-                        }
+
+                            let msg = PROC_MSG.lock().unwrap();
+
+                            match msg.message {
+                                WM_CLOSE => {
+                                    callback(WindowEvent::CloseRequested, &mut control_flow);
+                                }
+                                _ => {}
+                            }
+
                     }
-                }
 
-                Flow::Exit(code) => {
-                    println!("Exit");
-                    PostQuitMessage(code);
+                    Flow::Exit(code) => {
+                        PostQuitMessage(code);
+                    }
                 }
             }
         }
@@ -404,20 +409,23 @@ unsafe impl HasRawDisplayHandle for _Window {
     }
 }
 
-static mut MSG: MSG = MSG {
-    hwnd: 0,
-    message: 0,
-    wParam: 0,
-    lParam: 0,
-    time: 0,
-    pt: POINT { x: 0, y: 0 },
-};
+static PROC_MSG: Lazy<Arc<Mutex<MSG>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(MSG {
+        hwnd: 0,
+        message: 0,
+        wParam: 0,
+        lParam: 0,
+        time: 0,
+        pt: POINT { x: 0, y: 0 },
+    }))
+});
 
 extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     unsafe {
         match message {
             WM_CLOSE => {
-                MSG = MSG {
+                let mut msg = PROC_MSG.lock().unwrap();
+                *msg = MSG {
                     hwnd: window,
                     message,
                     wParam: wparam,
