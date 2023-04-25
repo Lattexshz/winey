@@ -5,7 +5,8 @@ use winey::{WindowEvent, WineyWindowImplementation};
 fn main() {
     let window = Window::new("Hello World", 500, 500);
 
-    window.show();
+    window.set_visible(true);
+    window.set_resizable(true);
 
     window.run(|event, _control_flow| match event {
         WindowEvent::CloseRequested => {

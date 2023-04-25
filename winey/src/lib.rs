@@ -48,8 +48,10 @@ pub struct Cursor {
 
 pub trait WineyWindowImplementation {
     /// Display window.
+    #[deprecated(since = "0.1.2", note = "Use set_visible to show or hide the window")]
     fn show(&self);
     /// Hide window.
+    #[deprecated(since = "0.1.2", note = "Use set_visible to show or hide the window")]
     fn hide(&self);
     // Setters
     /// Maximize the window.
@@ -63,10 +65,14 @@ pub trait WineyWindowImplementation {
     fn set_window_level(&self, level: WindowLevel);
     fn set_window_type(&self, type_: WindowType);
     fn set_cursor(&self, cursor: Cursor);
+    fn set_transparent(&self, transparent: bool);
+    fn set_visible(&self, visible: bool);
+    fn set_resizable(&self, resizable: bool);
+
 
     // Getters
-    fn get_title(&self) -> String;
-    fn get_window_pos(&self) -> (u32, u32);
-    fn get_window_rect(&self) -> WindowRect;
-    fn get_current_cursor(&self) -> Cursor;
+    fn title(&self) -> String;
+    fn position(&self) -> (u32, u32);
+    fn rect(&self) -> WindowRect;
+    fn current_cursor(&self) -> Cursor;
 }

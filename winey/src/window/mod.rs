@@ -110,20 +110,32 @@ impl WineyWindowImplementation for Window {
         self.inner.set_cursor(icon);
     }
 
-    fn get_title(&self) -> String {
-        self.inner.get_title()
+    fn set_transparent(&self, transparent: bool) {
+        self.inner.set_transparent(transparent);
     }
 
-    fn get_window_pos(&self) -> (u32, u32) {
-        self.inner.get_window_pos()
+    fn set_visible(&self, visible: bool) {
+        self.inner.set_visible(visible);
     }
 
-    fn get_window_rect(&self) -> WindowRect {
-        self.inner.get_window_rect()
+    fn set_resizable(&self, resizable: bool) {
+        self.inner.set_resizable(resizable);
     }
 
-    fn get_current_cursor(&self) -> Cursor {
-        self.inner.get_current_cursor()
+    fn title(&self) -> String {
+        self.inner.title()
+    }
+
+    fn position(&self) -> (u32, u32) {
+        self.inner.position()
+    }
+
+    fn rect(&self) -> WindowRect {
+        self.inner.rect()
+    }
+
+    fn current_cursor(&self) -> Cursor {
+        self.inner.current_cursor()
     }
 }
 

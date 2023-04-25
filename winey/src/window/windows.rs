@@ -11,14 +11,12 @@ use raw_window_handle::{
 use std::ffi::{c_uchar, c_void, OsStr};
 use std::mem::size_of;
 use std::os::windows::ffi::OsStrExt;
-use std::ptr::{addr_of, addr_of_mut};
+use std::ptr::{addr_of, addr_of_mut, null_mut};
 use std::sync::{Arc, Mutex};
 use once_cell::sync::Lazy;
 
 use windows_sys::core::PSTR;
-use windows_sys::Win32::Foundation::{
-    COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM,
-};
+use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, RECT, TRUE, WPARAM};
 use windows_sys::Win32::Graphics::Dwm::*;
 
 use crate::keyboard::*;
@@ -118,10 +116,10 @@ impl WindowInitialization for _Window {
             debug_assert!(atom != 0);
 
             let hwnd = CreateWindowExW(
-                0,
+                WS_EX_TRANSPARENT,
                 window_class.as_ptr(),
                 title_wide.as_ptr(),
-                WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+                WS_OVERLAPPEDWINDOW,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
                 width as i32,
@@ -241,7 +239,66 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn get_title(&self) -> String {
+    fn set_transparent(&self, transparent: bool) {
+        match transparent {
+            true => {
+                unsafe {
+                    let bb = DWM_BLURBEHIND {
+                        dwFlags: DWM_BB_ENABLE,
+                        fEnable: TRUE as i32,
+                        hRgnBlur: 0,
+                        fTransitionOnMaximized: 1,
+                    };
+
+                    DwmEnableBlurBehindWindow(self.hwnd, &bb);
+                }
+            }
+            false => {
+                unsafe {
+                    let bb = DWM_BLURBEHIND {
+                        dwFlags: DWM_BB_ENABLE,
+                        fEnable: 0,
+                        hRgnBlur: 0,
+                        fTransitionOnMaximized: 1,
+                    };
+
+                    DwmEnableBlurBehindWindow(self.hwnd, &bb);
+                }
+            }
+        }
+    }
+
+    fn set_visible(&self, visible: bool) {
+        match visible {
+            true => {
+                unsafe {
+                    ShowWindow(self.hwnd, SW_SHOW);
+                }
+            }
+            false => {
+                unsafe {
+                    ShowWindow(self.hwnd, SW_HIDE);
+                }
+            }
+        }
+    }
+
+    fn set_resizable(&self, resizable: bool) {
+        match resizable {
+            true => {
+                unsafe {
+                    SetWindowLongW(self.hwnd,GWL_STYLE,(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE) as i32);
+                }
+            }
+            false => {
+                unsafe {
+                    SetWindowLongW(self.hwnd,GWL_STYLE,WS_OVERLAPPEDWINDOW as i32);
+                }
+            }
+        }
+    }
+
+    fn title(&self) -> String {
         let mut buffer = [0u8; 1024];
 
         unsafe {
@@ -259,7 +316,7 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn get_window_pos(&self) -> (u32, u32) {
+    fn position(&self) -> (u32, u32) {
         unsafe {
             let mut rect = std::mem::zeroed();
             GetWindowRect(self.hwnd, &mut rect);
@@ -267,7 +324,7 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn get_window_rect(&self) -> WindowRect {
+    fn rect(&self) -> WindowRect {
         unsafe {
             let mut rect = RECT {
                 left: 0,
@@ -287,7 +344,7 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn get_current_cursor(&self) -> Cursor {
+    fn current_cursor(&self) -> Cursor {
         let point = unsafe { std::mem::zeroed() };
         unsafe {
             let h_cursor = GetCursor();
