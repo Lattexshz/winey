@@ -287,12 +287,12 @@ impl WineyWindowImplementation for _Window {
         match resizable {
             true => {
                 unsafe {
-                    SetWindowLongW(self.hwnd,GWL_STYLE,(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE) as i32);
+                    SetWindowLongW(self.hwnd,GWL_STYLE,WS_OVERLAPPEDWINDOW as i32);
                 }
             }
             false => {
                 unsafe {
-                    SetWindowLongW(self.hwnd,GWL_STYLE,WS_OVERLAPPEDWINDOW as i32);
+                    SetWindowLongW(self.hwnd,GWL_STYLE,((WS_OVERLAPPEDWINDOW & !(WS_THICKFRAME | WS_MAXIMIZEBOX)) | WS_VISIBLE) as i32);
                 }
             }
         }

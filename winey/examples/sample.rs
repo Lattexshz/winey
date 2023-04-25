@@ -6,7 +6,7 @@ fn main() {
     let window = Window::new("Hello World", 500, 500);
 
     window.set_visible(true);
-    window.set_resizable(true);
+    window.set_resizable(false);
 
     window.run(|event, _control_flow| match event {
         WindowEvent::CloseRequested => {
