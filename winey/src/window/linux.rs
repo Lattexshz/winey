@@ -1,6 +1,6 @@
 use crate::window::WindowInitialization;
 use crate::window::{ControlFlow, Flow};
-use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
+use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, XlibDisplayHandle,
     XlibWindowHandle,
@@ -107,16 +107,35 @@ impl WineyWindowImplementation for _Window {
         todo!()
     }
 
-    fn get_title(&self) -> String {
+    fn set_transparent(&self, transparent: bool) {
+
+    }
+
+    fn set_visible(&self, visible: bool) {
+        match visible {
+            true => {
+                self.window.map();
+            }
+            false => {
+                self.window.unmap();
+            }
+        }
+    }
+
+    fn set_resizable(&self, resizable: bool) {
+
+    }
+
+    fn title(&self) -> String {
         self.window.get_window_title()
     }
 
-    fn get_window_pos(&self) -> (u32, u32) {
+    fn position(&self) -> (u32, u32) {
         let geometry = self.window.get_geometry();
         (geometry.x as u32, geometry.y as u32)
     }
 
-    fn get_window_rect(&self) -> WindowRect {
+    fn rect(&self) -> WindowRect {
         let geometry = self.window.get_geometry();
         WindowRect {
             bottom: geometry.y + (geometry.height as i32),
@@ -126,8 +145,12 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn get_current_cursor(&self) -> Cursor {
-        todo!()
+    fn current_cursor(&self) -> Cursor {
+        Cursor {
+            icon: CursorIcon::Arrow,
+            x: 0,
+            y: 0,
+        }
     }
 }
 
