@@ -1,8 +1,6 @@
 use crate::platform::{Margin, WindowCorner, WindowExtForWindows};
 use crate::window::{ControlFlow, Flow, WindowInitialization};
-use crate::{
-    Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation,
-};
+use crate::{Cursor, CursorIcon, WindowEvent, WindowLevel, WindowRect, WindowTheme, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, Win32WindowHandle,
     WindowsDisplayHandle,
@@ -16,12 +14,12 @@ use std::sync::{Arc, Mutex};
 use once_cell::sync::Lazy;
 
 use windows_sys::core::PSTR;
-use windows_sys::Win32::Foundation::{COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, RECT, TRUE, WPARAM};
+use windows_sys::Win32::Foundation::{BOOL, COLORREF, HMODULE, HWND, LPARAM, LRESULT, POINT, RECT, TRUE, WPARAM};
 use windows_sys::Win32::Graphics::Dwm::*;
 
 use crate::keyboard::*;
 use windows_sys::Win32::System::LibraryLoader::*;
-use windows_sys::Win32::UI::Controls::MARGINS;
+use windows_sys::Win32::UI::Controls::{MARGINS, SetWindowTheme};
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetKeyboardState;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
@@ -221,6 +219,26 @@ impl WineyWindowImplementation for _Window {
             WindowType::Utility => unsafe {
                 SetWindowLongW(self.hwnd, GWL_EXSTYLE, WS_EX_TOOLWINDOW as i32);
             },
+        }
+    }
+
+    fn set_theme(&self, theme: WindowTheme) {
+
+        let attr = match theme {
+            WindowTheme::Auto => 0,
+            WindowTheme::Light => 0,
+            WindowTheme::Dark => {
+                DWMWA_USE_IMMERSIVE_DARK_MODE
+            }
+        };
+
+        unsafe {
+            DwmSetWindowAttribute(
+                self.hwnd,
+                attr,
+                &TRUE as *const i32 as *const c_void,
+                size_of::<BOOL>() as u32,
+            );
         }
     }
 
@@ -497,6 +515,7 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
     }
 }
 
+#[allow(non_snake_case)]
 fn RGB(r: c_uchar, g: c_uchar, b: c_uchar) -> COLORREF {
     (r as COLORREF | ((g as COLORREF) << 8) | ((b as COLORREF) << 16)) as COLORREF
 }

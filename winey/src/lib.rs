@@ -31,6 +31,12 @@ pub enum WindowType {
     Utility,
 }
 
+pub enum WindowTheme {
+    Auto,
+    Light,
+    Dark
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum CursorIcon {
     Arrow,
@@ -64,6 +70,7 @@ pub trait WineyWindowImplementation {
     fn set_undecorated(&self, undecorated: bool);
     fn set_window_level(&self, level: WindowLevel);
     fn set_window_type(&self, type_: WindowType);
+    fn set_theme(&self, theme: WindowTheme);
     fn set_cursor(&self, cursor: Cursor);
     fn set_transparent(&self, transparent: bool);
     fn set_visible(&self, visible: bool);

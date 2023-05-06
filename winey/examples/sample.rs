@@ -1,12 +1,14 @@
 use winey::keyboard::{get_key_name, get_key_state};
 use winey::window::Window;
-use winey::{WindowEvent, WineyWindowImplementation};
+use winey::{WindowEvent, WindowTheme, WineyWindowImplementation};
 
 fn main() {
     let window = Window::new("Hello World", 500, 500);
 
     window.set_visible(true);
     window.set_resizable(false);
+
+    window.set_theme(WindowTheme::Dark);
 
     window.run(|event, _control_flow| match event {
         WindowEvent::CloseRequested => {

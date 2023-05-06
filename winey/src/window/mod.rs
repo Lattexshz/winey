@@ -1,4 +1,4 @@
-use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowType, WineyWindowImplementation};
+use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowTheme, WindowType, WineyWindowImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };
@@ -104,6 +104,10 @@ impl WineyWindowImplementation for Window {
 
     fn set_window_type(&self, type_: WindowType) {
         self.inner.set_window_type(type_)
+    }
+
+    fn set_theme(&self, theme: WindowTheme) {
+        self.inner.set_theme(theme);
     }
 
     fn set_cursor(&self, icon: Cursor) {
