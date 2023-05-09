@@ -199,7 +199,7 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn set_window_level(&self, level: WindowLevel) {
+    fn set_level(&self, level: WindowLevel) {
         match level {
             WindowLevel::Normal => unsafe {
                 SetWindowPos(self.hwnd, HWND_DESKTOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -211,7 +211,7 @@ impl WineyWindowImplementation for _Window {
         }
     }
 
-    fn set_window_type(&self, type_: WindowType) {
+    fn set_type(&self, type_: WindowType) {
         match type_ {
             WindowType::Normal => unsafe {
                 SetWindowLongW(self.hwnd, GWL_EXSTYLE, 0);

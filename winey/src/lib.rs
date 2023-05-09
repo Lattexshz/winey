@@ -68,8 +68,8 @@ pub trait WineyWindowImplementation {
     fn set_title(&self, title: &str);
     /// Set window undecorated.
     fn set_undecorated(&self, undecorated: bool);
-    fn set_window_level(&self, level: WindowLevel);
-    fn set_window_type(&self, type_: WindowType);
+    fn set_level(&self, level: WindowLevel);
+    fn set_type(&self, type_: WindowType);
     fn set_theme(&self, theme: WindowTheme);
     fn set_cursor(&self, cursor: Cursor);
     fn set_transparent(&self, transparent: bool);

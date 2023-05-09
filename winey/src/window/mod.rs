@@ -98,12 +98,12 @@ impl WineyWindowImplementation for Window {
         self.inner.set_undecorated(undecorated);
     }
 
-    fn set_window_level(&self, level: WindowLevel) {
-        self.inner.set_window_level(level);
+    fn set_level(&self, level: WindowLevel) {
+        self.inner.set_level(level);
     }
 
-    fn set_window_type(&self, type_: WindowType) {
-        self.inner.set_window_type(type_)
+    fn set_type(&self, type_: WindowType) {
+        self.inner.set_type(type_)
     }
 
     fn set_theme(&self, theme: WindowTheme) {
