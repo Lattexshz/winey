@@ -83,3 +83,8 @@ pub trait WineyWindowImplementation {
     fn rect(&self) -> WindowRect;
     fn current_cursor(&self) -> Cursor;
 }
+
+pub trait WineyWindowBuilderImplementation {
+    fn title(mut self) -> Self;
+    fn position(mut self,x:u32,y:u32) -> Self;
+}

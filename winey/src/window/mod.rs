@@ -1,4 +1,4 @@
-use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowTheme, WindowType, WineyWindowImplementation};
+use crate::{Cursor, WindowEvent, WindowLevel, WindowRect, WindowTheme, WindowType, WineyWindowImplementation, WineyWindowBUilderImplementation};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };
@@ -163,5 +163,30 @@ impl crate::platform::WindowExtForWindows for Window {
 
     fn extend_frame_into_client_area(&self, rect: crate::platform::windows::Margin) {
         self.inner.extend_frame_into_client_area(rect);
+    }
+}
+
+pub struct WindowBuilder {
+    title: String,
+    x: u32,
+    y: u32
+}
+
+impl WineyWindowBuilderImplementation for WindowBuilder {
+    fn title(mut self) -> Self {
+        self.title = title.to_string();
+        self
+    }
+
+    fn position(mut self,x:u32,y:u32) -> Self {
+        self.x = x;
+        self.y = y;
+        self
+    }
+}
+
+impl WindowBuilder {
+    pub fn build(self) -> Window {
+        
     }
 }
